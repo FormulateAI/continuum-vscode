@@ -1,5 +1,15 @@
 # Continuum VSCode Extension
 
+[![GitHub](https://img.shields.io/badge/github-FormulateAI%2Fcontinuum--vscode-blue?logo=github)](https://github.com/FormulateAI/continuum-vscode)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![VS Code](https://img.shields.io/badge/VS%20Code-Extension-blue?logo=visualstudiocode)](https://github.com/FormulateAI/continuum-vscode)
+
+**🔗 GitHub:** https://github.com/FormulateAI/continuum-vscode  
+**📦 Main Project:** https://github.com/FormulateAI/continuum  
+**🐍 PyPI Package:** https://pypi.org/project/continuum-context-hub/
+
+---
+
 Connect VS Code to **Continuum** - the universal context layer that lets you seamlessly switch between AI coding assistants (Cursor, Windsurf, Antigravity) without losing your development context.
 
 ## Features
