@@ -1,0 +1,59 @@
+{
+  "name": "continuum-vscode",
+  "displayName": "Continuum Context Hub",
+  "description": "Connect VS Code to Continuum - the universal context layer for AI agents across IDEs",
+  "version": "0.1.0",
+  "publisher": "FormulateAI",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FormulateAI/continuum-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/FormulateAI/continuum-vscode/issues"
+  },
+  "homepage": "https://github.com/FormulateAI/continuum-vscode#readme",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "continuum",
+    "context",
+    "ai",
+    "agent",
+    "memory",
+    "cursor",
+    "windsurf",
+    "antigravity"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "context-hub.connect",
+        "title": "Continuum: Connect to Hub"
+      },
+      {
+        "command": "context-hub.pushSelection",
+        "title": "Continuum: Push Selection to Context"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
+}
