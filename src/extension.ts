@@ -1,61 +1,137 @@
 import * as vscode from 'vscode';
-import axios from 'axios';
+import { ContinuumClient } from './api';
+import { MemoryTreeProvider } from './sidebar';
+import {
+  connectCommand,
+  rememberCommand,
+  recallCommand,
+  showProjectContextCommand,
+  syncCommand,
+  pushSelectionCommand,
+} from './commands';
 
-const SERVER_URL = 'http://localhost:8000';
+let healthTimer: ReturnType<typeof setInterval> | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Context Hub Connector is now active!');
+  const client = ContinuumClient.fromSettings();
+  const treeProvider = new MemoryTreeProvider(client);
 
-    // Command: Connect
-    let connectDisposable = vscode.commands.registerCommand('context-hub.connect', async () => {
+  // --- Status bar ---
+  const statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    100,
+  );
+  statusBar.command = 'continuum.connect';
+  statusBar.text = '$(database) Continuum';
+  statusBar.tooltip = 'Click to check Continuum connection';
+  statusBar.show();
+  context.subscriptions.push(statusBar);
+
+  async function updateStatus() {
+    try {
+      await client.healthCheck();
+      statusBar.text = '$(database) Continuum';
+      statusBar.tooltip = 'Continuum: connected';
+    } catch {
+      statusBar.text = '$(database) Continuum (offline)';
+      statusBar.tooltip = 'Continuum: disconnected — click to retry';
+    }
+  }
+
+  updateStatus();
+  healthTimer = setInterval(updateStatus, 30_000);
+
+  // --- Sidebar tree view ---
+  const treeView = vscode.window.createTreeView('continuum-memories', {
+    treeDataProvider: treeProvider,
+  });
+  context.subscriptions.push(treeView);
+
+  // --- Commands ---
+  context.subscriptions.push(
+    vscode.commands.registerCommand('continuum.connect', async () => {
+      const ok = await connectCommand(client);
+      if (ok) {
+        statusBar.text = '$(database) Continuum';
+        statusBar.tooltip = 'Continuum: connected';
+        treeProvider.refresh();
+      }
+    }),
+    vscode.commands.registerCommand('continuum.remember', async () => {
+      await rememberCommand(client);
+      treeProvider.refresh();
+    }),
+    vscode.commands.registerCommand('continuum.recall', () =>
+      recallCommand(client),
+    ),
+    vscode.commands.registerCommand('continuum.showContext', () =>
+      showProjectContextCommand(client),
+    ),
+    vscode.commands.registerCommand('continuum.sync', async () => {
+      await syncCommand(client);
+      treeProvider.refresh();
+    }),
+    vscode.commands.registerCommand('continuum.pushSelection', async () => {
+      await pushSelectionCommand(client);
+      treeProvider.refresh();
+    }),
+    vscode.commands.registerCommand('continuum.refreshMemories', () =>
+      treeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand(
+      'continuum.deleteMemory',
+      async (item: { memoryItem?: { id: string } }) => {
+        if (!item?.memoryItem) { return; }
         try {
-            const response = await axios.get(`${SERVER_URL}/`);
-            if (response.status === 200) {
-                vscode.window.showInformationMessage('Connected to Context Hub!');
-            }
-        } catch (error) {
-            vscode.window.showErrorMessage('Failed to connect to Context Hub. Is the server running?');
+          await client.deleteMemory(item.memoryItem.id);
+          vscode.window.showInformationMessage('Memory deleted.');
+          treeProvider.refresh();
+        } catch {
+          vscode.window.showErrorMessage('Failed to delete memory.');
         }
-    });
+      },
+    ),
+    vscode.commands.registerCommand(
+      'continuum.copyMemoryContent',
+      async (item: { memoryItem?: { content: string } }) => {
+        if (!item?.memoryItem) { return; }
+        await vscode.env.clipboard.writeText(item.memoryItem.content);
+        vscode.window.showInformationMessage('Copied to clipboard.');
+      },
+    ),
+  );
 
-    // Command: Push Selection
-    let pushDisposable = vscode.commands.registerCommand('context-hub.pushSelection', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showWarningMessage('No active editor found.');
-            return;
-        }
+  // --- Auto-push on save ---
+  const config = vscode.workspace.getConfiguration('continuum');
+  if (config.get<boolean>('autoPushOnSave', false)) {
+    let saveTimeout: ReturnType<typeof setTimeout> | undefined;
 
-        const selection = editor.selection;
-        const text = editor.document.getText(selection);
-
-        if (!text) {
-            vscode.window.showWarningMessage('No text selected.');
-            return;
-        }
-
+    const saveWatcher = vscode.workspace.onDidSaveTextDocument(doc => {
+      if (saveTimeout) { clearTimeout(saveTimeout); }
+      saveTimeout = setTimeout(async () => {
         try {
-            // Get current session (simplified for MVP)
-            // In real app, we might store session ID in workspace state
-            const sessionResp = await axios.get(`${SERVER_URL}/session/current`);
-
-            await axios.post(`${SERVER_URL}/context/add`, {
-                type: 'code_selection',
-                content: text,
-                metadata: {
-                    file: editor.document.fileName,
-                    language: editor.document.languageId
-                }
-            });
-
-            vscode.window.showInformationMessage('Selection pushed to Context Hub!');
-        } catch (error) {
-            vscode.window.showErrorMessage('Failed to push context. Ensure a session is active.');
+          const project = await client.getWorkspaceProject();
+          if (!project) { return; }
+          await client.storeMemory(
+            project.id,
+            `File saved: ${vscode.workspace.asRelativePath(doc.uri)}`,
+            'general',
+            'ephemeral',
+            'vscode-autosave',
+            [doc.languageId],
+          );
+        } catch {
+          // Silently ignore auto-push failures
         }
+      }, 2000);
     });
-
-    context.subscriptions.push(connectDisposable);
-    context.subscriptions.push(pushDisposable);
+    context.subscriptions.push(saveWatcher);
+  }
 }
 
-export function deactivate() { }
+export function deactivate() {
+  if (healthTimer) {
+    clearInterval(healthTimer);
+    healthTimer = undefined;
+  }
+}

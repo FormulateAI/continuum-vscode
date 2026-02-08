@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Outer arcs — continuous flow -->
+  <path d="M12 3 A9 9 0 0 1 21 12" stroke="#C5C5C5" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M12 21 A9 9 0 0 1 3 12" stroke="#C5C5C5" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Orbit ring -->
+  <circle cx="12" cy="12" r="5.5" stroke="#C5C5C5" stroke-width="1.2" fill="none"/>
+
+  <!-- Core hub -->
+  <circle cx="12" cy="12" r="2.5" fill="#C5C5C5"/>
+
+  <!-- Orbiting nodes -->
+  <circle cx="6.5" cy="12" r="1.2" fill="#C5C5C5"/>
+  <circle cx="17.5" cy="12" r="1.2" fill="#C5C5C5"/>
+  <circle cx="12" cy="6.5" r="1.2" fill="#C5C5C5"/>
+  <circle cx="12" cy="17.5" r="1.2" fill="#C5C5C5"/>
+</svg>

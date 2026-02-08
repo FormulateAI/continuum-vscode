@@ -2,7 +2,7 @@
   "name": "continuum-vscode",
   "displayName": "Continuum Context Hub",
   "description": "Connect VS Code to Continuum - the universal context layer for AI agents across IDEs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "FormulateAI",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
   },
   "homepage": "https://github.com/FormulateAI/continuum-vscode#readme",
   "license": "Apache-2.0",
+  "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -29,19 +30,94 @@
     "windsurf",
     "antigravity"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "context-hub.connect",
-        "title": "Continuum: Connect to Hub"
+        "command": "continuum.connect",
+        "title": "Continuum: Connect"
       },
       {
-        "command": "context-hub.pushSelection",
-        "title": "Continuum: Push Selection to Context"
+        "command": "continuum.remember",
+        "title": "Continuum: Remember"
+      },
+      {
+        "command": "continuum.recall",
+        "title": "Continuum: Recall"
+      },
+      {
+        "command": "continuum.showContext",
+        "title": "Continuum: Project Context"
+      },
+      {
+        "command": "continuum.sync",
+        "title": "Continuum: Sync"
+      },
+      {
+        "command": "continuum.pushSelection",
+        "title": "Continuum: Push Selection"
+      },
+      {
+        "command": "continuum.refreshMemories",
+        "title": "Continuum: Refresh Memories"
+      },
+      {
+        "command": "continuum.deleteMemory",
+        "title": "Continuum: Delete Memory"
+      },
+      {
+        "command": "continuum.copyMemoryContent",
+        "title": "Continuum: Copy Memory Content"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "continuum",
+          "title": "Continuum",
+          "icon": "media/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "continuum": [
+        {
+          "id": "continuum-memories",
+          "name": "Memories"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "continuum.deleteMemory",
+          "when": "view == continuum-memories && viewItem == memory",
+          "group": "inline"
+        },
+        {
+          "command": "continuum.copyMemoryContent",
+          "when": "view == continuum-memories && viewItem == memory"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Continuum",
+      "properties": {
+        "continuum.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL of the Continuum server"
+        },
+        "continuum.autoPushOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically push a memory when files are saved"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
