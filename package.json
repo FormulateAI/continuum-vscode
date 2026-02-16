@@ -18,8 +18,14 @@
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Other"
+    "AI",
+    "Machine Learning"
   ],
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
+  "preview": true,
   "keywords": [
     "continuum",
     "context",
@@ -28,7 +34,9 @@
     "memory",
     "cursor",
     "windsurf",
-    "antigravity"
+    "antigravity",
+    "llm",
+    "context-switching"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -90,6 +98,12 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "continuum-memories",
+        "contents": "No memories found.\n\nMake sure the Continuum server is running, then connect.\n[Connect to Continuum](command:continuum.connect)\n\nOnce connected, store your first memory.\n[Remember Something](command:continuum.remember)"
+      }
+    ],
     "menus": {
       "view/item/context": [
         {

@@ -9,6 +9,32 @@ import {
   Importance,
 } from './types';
 
+export function formatApiError(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    if (err.code === 'ECONNREFUSED') {
+      return 'Cannot connect to Continuum server. Is it running?';
+    }
+    if (err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') {
+      return 'Continuum server request timed out.';
+    }
+    if (err.response) {
+      const status = err.response.status;
+      const detail = err.response.data?.detail;
+      if (detail) {
+        return `Continuum server error (${status}): ${detail}`;
+      }
+      return `Continuum server error (${status}).`;
+    }
+    if (err.message) {
+      return `Continuum request failed: ${err.message}`;
+    }
+  }
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return 'An unexpected error occurred.';
+}
+
 export class ContinuumClient {
   private http: AxiosInstance;
 

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ContinuumClient } from './api';
+import { ContinuumClient, formatApiError } from './api';
 import { MEMORY_CATEGORIES, IMPORTANCE_LEVELS, MemoryCategory, Importance } from './types';
 
 export async function connectCommand(client: ContinuumClient): Promise<boolean> {
@@ -9,10 +9,8 @@ export async function connectCommand(client: ContinuumClient): Promise<boolean> 
       `Connected to Continuum v${info.version}`,
     );
     return true;
-  } catch {
-    vscode.window.showErrorMessage(
-      'Failed to connect to Continuum. Is the server running?',
-    );
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
     return false;
   }
 }
@@ -51,8 +49,8 @@ export async function rememberCommand(client: ContinuumClient): Promise<void> {
       'vscode',
     );
     vscode.window.showInformationMessage('Memory stored.');
-  } catch {
-    vscode.window.showErrorMessage('Failed to store memory.');
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
   }
 }
 
@@ -92,8 +90,8 @@ export async function recallCommand(client: ContinuumClient): Promise<void> {
       language: 'markdown',
     });
     await vscode.window.showTextDocument(doc, { preview: true });
-  } catch {
-    vscode.window.showErrorMessage('Failed to search memories.');
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
   }
 }
 
@@ -133,8 +131,8 @@ export async function showProjectContextCommand(
       language: 'markdown',
     });
     await vscode.window.showTextDocument(doc, { preview: true });
-  } catch {
-    vscode.window.showErrorMessage('Failed to load project context.');
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
   }
 }
 
@@ -173,7 +171,7 @@ export async function pushSelectionCommand(
       [],
     );
     vscode.window.showInformationMessage('Selection pushed to Continuum.');
-  } catch {
-    vscode.window.showErrorMessage('Failed to push selection.');
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
   }
 }

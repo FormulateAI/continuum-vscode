@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ContinuumClient } from './api';
+import { ContinuumClient, formatApiError } from './api';
 import { MemoryTreeProvider } from './sidebar';
 import {
   connectCommand,
@@ -13,7 +13,7 @@ import {
 let healthTimer: ReturnType<typeof setInterval> | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-  const client = ContinuumClient.fromSettings();
+  let client = ContinuumClient.fromSettings();
   const treeProvider = new MemoryTreeProvider(client);
 
   // --- Status bar ---
@@ -46,6 +46,63 @@ export function activate(context: vscode.ExtensionContext) {
     treeDataProvider: treeProvider,
   });
   context.subscriptions.push(treeView);
+
+  // --- Auto-push on save ---
+  let saveWatcher: vscode.Disposable | undefined;
+
+  function setupAutoSave() {
+    if (saveWatcher) {
+      saveWatcher.dispose();
+      saveWatcher = undefined;
+    }
+
+    const config = vscode.workspace.getConfiguration('continuum');
+    if (!config.get<boolean>('autoPushOnSave', false)) {
+      return;
+    }
+
+    let saveTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    saveWatcher = vscode.workspace.onDidSaveTextDocument(doc => {
+      if (saveTimeout) { clearTimeout(saveTimeout); }
+      saveTimeout = setTimeout(async () => {
+        try {
+          const project = await client.getWorkspaceProject();
+          if (!project) { return; }
+          const relativePath = vscode.workspace.asRelativePath(doc.uri);
+          const lineCount = doc.lineCount;
+          const lang = doc.languageId;
+          await client.storeMemory(
+            project.id,
+            `File updated: ${relativePath} (${lineCount} lines, ${lang})`,
+            'general',
+            'ephemeral',
+            'vscode-autosave',
+            [lang],
+          );
+        } catch {
+          // Silently ignore auto-push failures
+        }
+      }, 2000);
+    });
+    context.subscriptions.push(saveWatcher);
+  }
+
+  setupAutoSave();
+
+  // --- Configuration change listener ---
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration('continuum.serverUrl')) {
+        client = ContinuumClient.fromSettings();
+        treeProvider.updateClient(client);
+        updateStatus();
+      }
+      if (e.affectsConfiguration('continuum.autoPushOnSave')) {
+        setupAutoSave();
+      }
+    }),
+  );
 
   // --- Commands ---
   context.subscriptions.push(
@@ -86,8 +143,8 @@ export function activate(context: vscode.ExtensionContext) {
           await client.deleteMemory(item.memoryItem.id);
           vscode.window.showInformationMessage('Memory deleted.');
           treeProvider.refresh();
-        } catch {
-          vscode.window.showErrorMessage('Failed to delete memory.');
+        } catch (err) {
+          vscode.window.showErrorMessage(formatApiError(err));
         }
       },
     ),
@@ -100,33 +157,6 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
   );
-
-  // --- Auto-push on save ---
-  const config = vscode.workspace.getConfiguration('continuum');
-  if (config.get<boolean>('autoPushOnSave', false)) {
-    let saveTimeout: ReturnType<typeof setTimeout> | undefined;
-
-    const saveWatcher = vscode.workspace.onDidSaveTextDocument(doc => {
-      if (saveTimeout) { clearTimeout(saveTimeout); }
-      saveTimeout = setTimeout(async () => {
-        try {
-          const project = await client.getWorkspaceProject();
-          if (!project) { return; }
-          await client.storeMemory(
-            project.id,
-            `File saved: ${vscode.workspace.asRelativePath(doc.uri)}`,
-            'general',
-            'ephemeral',
-            'vscode-autosave',
-            [doc.languageId],
-          );
-        } catch {
-          // Silently ignore auto-push failures
-        }
-      }, 2000);
-    });
-    context.subscriptions.push(saveWatcher);
-  }
 }
 
 export function deactivate() {

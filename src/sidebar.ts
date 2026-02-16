@@ -53,6 +53,11 @@ export class MemoryTreeProvider implements vscode.TreeDataProvider<MemoryTreeIte
 
   constructor(private client: ContinuumClient) {}
 
+  updateClient(client: ContinuumClient): void {
+    this.client = client;
+    this.refresh();
+  }
+
   refresh(): void {
     this._onDidChangeTreeData.fire();
   }
