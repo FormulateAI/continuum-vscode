@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ContinuumClient, formatApiError } from './api';
 import { MemoryTreeProvider } from './sidebar';
+import { ServerManager } from './server';
 import {
   connectCommand,
   rememberCommand,
@@ -8,13 +9,27 @@ import {
   showProjectContextCommand,
   syncCommand,
   pushSelectionCommand,
+  editMemoryCommand,
 } from './commands';
 
 let healthTimer: ReturnType<typeof setInterval> | undefined;
+let serverManager: ServerManager | undefined;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   let client = ContinuumClient.fromSettings();
   const treeProvider = new MemoryTreeProvider(client);
+
+  // --- Server lifecycle management ---
+  const config = vscode.workspace.getConfiguration('continuum');
+  const serverManaged = config.get<boolean>('serverManaged', true);
+
+  if (serverManaged) {
+    serverManager = new ServerManager(context);
+    const installed = await serverManager.ensureInstalled();
+    if (installed) {
+      await serverManager.start();
+    }
+  }
 
   // --- Status bar ---
   const statusBar = vscode.window.createStatusBarItem(
@@ -32,9 +47,18 @@ export function activate(context: vscode.ExtensionContext) {
       await client.healthCheck();
       statusBar.text = '$(database) Continuum';
       statusBar.tooltip = 'Continuum: connected';
-    } catch {
+    } catch (err) {
+      console.warn('Continuum: health check failed:', err);
       statusBar.text = '$(database) Continuum (offline)';
       statusBar.tooltip = 'Continuum: disconnected — click to retry';
+
+      // If server is managed and died, offer restart
+      if (serverManager) {
+        const running = await serverManager.isRunning();
+        if (!running) {
+          statusBar.tooltip = 'Continuum: server stopped — click to restart';
+        }
+      }
     }
   }
 
@@ -125,8 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
       showProjectContextCommand(client),
     ),
     vscode.commands.registerCommand('continuum.sync', async () => {
-      await syncCommand(client);
-      treeProvider.refresh();
+      await syncCommand(client, treeProvider);
     }),
     vscode.commands.registerCommand('continuum.pushSelection', async () => {
       await pushSelectionCommand(client);
@@ -156,6 +179,19 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Copied to clipboard.');
       },
     ),
+    vscode.commands.registerCommand(
+      'continuum.editMemory',
+      async (item: { memoryItem?: import('./types').MemoryItem }) => {
+        if (!item?.memoryItem) { return; }
+        const updated = await editMemoryCommand(client, item.memoryItem);
+        if (updated) {
+          treeProvider.refresh();
+        }
+      },
+    ),
+    vscode.commands.registerCommand('continuum.showServerLogs', () => {
+      serverManager?.showLogs();
+    }),
   );
 }
 
@@ -163,5 +199,9 @@ export function deactivate() {
   if (healthTimer) {
     clearInterval(healthTimer);
     healthTimer = undefined;
+  }
+  if (serverManager) {
+    serverManager.stop();
+    serverManager = undefined;
   }
 }

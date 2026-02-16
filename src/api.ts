@@ -106,6 +106,20 @@ export class ContinuumClient {
     return resp.data;
   }
 
+  async updateMemory(
+    memoryId: string,
+    updates: {
+      content?: string;
+      category?: MemoryCategory;
+      importance?: Importance;
+      tags?: string[];
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<MemoryItem> {
+    const resp = await this.http.put(`/v2/memories/${memoryId}`, updates);
+    return resp.data;
+  }
+
   async deleteMemory(memoryId: string): Promise<void> {
     await this.http.delete(`/v2/memories/${memoryId}`);
   }

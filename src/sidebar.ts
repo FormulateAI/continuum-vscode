@@ -105,8 +105,8 @@ export class MemoryTreeProvider implements vscode.TreeDataProvider<MemoryTreeIte
           this.memoriesByCategory.set(cat, memories);
         }
       }
-    } catch {
-      // Server unreachable — return empty tree
+    } catch (err) {
+      console.warn('Continuum: Failed to load memories for sidebar:', err);
       return [];
     }
 

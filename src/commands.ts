@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ContinuumClient, formatApiError } from './api';
-import { MEMORY_CATEGORIES, IMPORTANCE_LEVELS, MemoryCategory, Importance } from './types';
+import { MEMORY_CATEGORIES, IMPORTANCE_LEVELS, MemoryCategory, Importance, MemoryItem } from './types';
 
 export async function connectCommand(client: ContinuumClient): Promise<boolean> {
   try {
@@ -75,7 +75,7 @@ export async function recallCommand(client: ContinuumClient): Promise<void> {
     }
 
     const items = results.map(r => ({
-      label: r.content.length > 80 ? r.content.substring(0, 80) + '…' : r.content,
+      label: r.content.length > 80 ? r.content.substring(0, 80) + '\u2026' : r.content,
       detail: `Score: ${r.score.toFixed(2)}`,
       content: r.content,
     }));
@@ -136,8 +136,13 @@ export async function showProjectContextCommand(
   }
 }
 
-export async function syncCommand(client: ContinuumClient): Promise<void> {
+export async function syncCommand(
+  client: ContinuumClient,
+  treeProvider: { refresh(): void },
+): Promise<void> {
   await showProjectContextCommand(client);
+  treeProvider.refresh();
+  vscode.window.showInformationMessage('Continuum: Sidebar refreshed.');
 }
 
 export async function pushSelectionCommand(
@@ -161,17 +166,71 @@ export async function pushSelectionCommand(
     return;
   }
 
+  const categoryPick = await vscode.window.showQuickPick(
+    MEMORY_CATEGORIES.map(c => ({ label: c })),
+    { placeHolder: 'Select a category for this selection' },
+  );
+  if (!categoryPick) { return; }
+
+  const importancePick = await vscode.window.showQuickPick(
+    IMPORTANCE_LEVELS.map(i => ({ label: i })),
+    { placeHolder: 'Select importance level' },
+  );
+  if (!importancePick) { return; }
+
   try {
     await client.storeMemory(
       project.id,
       text,
-      'general',
-      'medium',
+      categoryPick.label as MemoryCategory,
+      importancePick.label as Importance,
       'vscode-selection',
       [],
     );
     vscode.window.showInformationMessage('Selection pushed to Continuum.');
   } catch (err) {
     vscode.window.showErrorMessage(formatApiError(err));
+  }
+}
+
+export async function editMemoryCommand(
+  client: ContinuumClient,
+  memoryItem: MemoryItem,
+): Promise<boolean> {
+  const content = await vscode.window.showInputBox({
+    prompt: 'Edit memory content',
+    value: memoryItem.content,
+  });
+  if (content === undefined) { return false; }
+
+  const categoryPick = await vscode.window.showQuickPick(
+    MEMORY_CATEGORIES.map(c => ({
+      label: c,
+      picked: c === memoryItem.category,
+    })),
+    { placeHolder: 'Select category' },
+  );
+  if (!categoryPick) { return false; }
+
+  const importancePick = await vscode.window.showQuickPick(
+    IMPORTANCE_LEVELS.map(i => ({
+      label: i,
+      picked: i === memoryItem.importance,
+    })),
+    { placeHolder: 'Select importance' },
+  );
+  if (!importancePick) { return false; }
+
+  try {
+    await client.updateMemory(memoryItem.id, {
+      content,
+      category: categoryPick.label as MemoryCategory,
+      importance: importancePick.label as Importance,
+    });
+    vscode.window.showInformationMessage('Memory updated.');
+    return true;
+  } catch (err) {
+    vscode.window.showErrorMessage(formatApiError(err));
+    return false;
   }
 }
