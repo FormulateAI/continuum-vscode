@@ -2,6 +2,20 @@
 
 All notable changes to the "continuum-vscode" extension will be documented in this file.
 
+## [0.2.3] - 2026-03-10
+
+### Changed
+- **Professional UX overhaul** — all commands now use consistent `Context Hub:` prefix and descriptive titles
+- **Keyboard shortcuts** — `Cmd/Ctrl+Shift+Alt+M` save memory, `+R` search memories, `+S` save selection
+- **Smarter quick pickers** — category and importance dropdowns now show descriptions (e.g. "Naming rules, formatting standards, code style")
+- **Input validation** — Save Memory prompt rejects entries shorter than 5 characters
+- **Editor right-click menu** — "Save Selection as Memory" appears in context menu when text is selected
+- **Improved welcome screen** — step-by-step onboarding with documentation link
+- **Removed `preview` flag** — extension is now marked stable on the marketplace
+- **Better settings** — all config properties have clear markdown descriptions with cross-references
+- **Activity bar** renamed to "Context Hub"; sidebar panel renamed to "Project Memory"
+- **Project Context view** — categories sorted by importance (architecture → decisions → debugging)
+
 ## [0.2.2] - 2026-03-10
 
 ### Changed

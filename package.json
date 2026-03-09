@@ -1,8 +1,8 @@
 {
   "name": "continuum-vscode",
   "displayName": "Continuum Context Hub",
-  "description": "Connect VS Code to Continuum - the universal context layer for AI agents across IDEs",
-  "version": "0.2.2",
+  "description": "Persistent AI memory for your codebase — store decisions, conventions, and architecture notes that any AI agent can recall instantly.",
+  "version": "0.2.3",
   "publisher": "FormulateAI",
   "repository": {
     "type": "git",
@@ -19,24 +19,24 @@
   },
   "categories": [
     "AI",
-    "Machine Learning"
+    "Machine Learning",
+    "Other"
   ],
   "galleryBanner": {
     "color": "#1e1e2e",
     "theme": "dark"
   },
-  "preview": true,
   "keywords": [
+    "ai memory",
+    "context hub",
     "continuum",
-    "context",
-    "ai",
-    "agent",
-    "memory",
+    "claude",
     "cursor",
-    "windsurf",
-    "antigravity",
-    "llm",
-    "context-switching"
+    "copilot",
+    "ai agent",
+    "project knowledge",
+    "llm context",
+    "developer productivity"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -46,54 +46,79 @@
     "commands": [
       {
         "command": "continuum.connect",
-        "title": "Context Hub: Connect"
+        "title": "Context Hub: Connect",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.remember",
-        "title": "Continuum: Remember"
+        "title": "Context Hub: Save Memory",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.recall",
-        "title": "Continuum: Recall"
+        "title": "Context Hub: Search Memories",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.showContext",
-        "title": "Continuum: Project Context"
-      },
-      {
-        "command": "continuum.sync",
-        "title": "Continuum: Sync"
+        "title": "Context Hub: View Project Context",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.pushSelection",
-        "title": "Continuum: Push Selection"
+        "title": "Context Hub: Save Selection as Memory",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.refreshMemories",
-        "title": "Continuum: Refresh Memories"
+        "title": "Context Hub: Refresh",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.deleteMemory",
-        "title": "Continuum: Delete Memory"
+        "title": "Context Hub: Delete Memory",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.copyMemoryContent",
-        "title": "Continuum: Copy Memory Content"
+        "title": "Context Hub: Copy Memory",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.editMemory",
-        "title": "Continuum: Edit Memory"
+        "title": "Context Hub: Edit Memory",
+        "category": "Context Hub"
       },
       {
         "command": "continuum.showServerLogs",
-        "title": "Continuum: Show Server Logs"
+        "title": "Context Hub: Show Server Logs",
+        "category": "Context Hub"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "continuum.remember",
+        "key": "ctrl+shift+alt+m",
+        "mac": "cmd+shift+alt+m",
+        "when": "editorFocus"
+      },
+      {
+        "command": "continuum.recall",
+        "key": "ctrl+shift+alt+r",
+        "mac": "cmd+shift+alt+r"
+      },
+      {
+        "command": "continuum.pushSelection",
+        "key": "ctrl+shift+alt+s",
+        "mac": "cmd+shift+alt+s",
+        "when": "editorHasSelection"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
           "id": "continuum",
-          "title": "Continuum",
+          "title": "Context Hub",
           "icon": "media/sidebar-icon.svg"
         }
       ]
@@ -102,55 +127,66 @@
       "continuum": [
         {
           "id": "continuum-memories",
-          "name": "Memories"
+          "name": "Project Memory"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "continuum-memories",
-        "contents": "No memories found.\n\nMake sure the Continuum server is running, then connect.\n[Connect to Context Hub](command:continuum.connect)\n\nOnce connected, store your first memory.\n[Remember Something](command:continuum.remember)"
+        "contents": "No project memories yet.\n\nContext Hub stores your team's architectural decisions, coding conventions, and key patterns so AI agents can recall them automatically.\n\n**Step 1:** Connect to the Context Hub server.\n[Connect to Context Hub](command:continuum.connect)\n\n**Step 2:** Save your first memory.\n[Save a Memory](command:continuum.remember)\n\nNeed help? [View Documentation](https://github.com/FormulateAI/continuum-vscode#readme)"
       }
     ],
     "menus": {
       "view/item/context": [
         {
-          "command": "continuum.deleteMemory",
-          "when": "view == continuum-memories && viewItem == memory",
-          "group": "inline"
-        },
-        {
           "command": "continuum.editMemory",
-          "when": "view == continuum-memories && viewItem == memory"
+          "when": "view == continuum-memories && viewItem == memory",
+          "group": "1_modify@1"
         },
         {
           "command": "continuum.copyMemoryContent",
-          "when": "view == continuum-memories && viewItem == memory"
+          "when": "view == continuum-memories && viewItem == memory",
+          "group": "1_modify@2"
+        },
+        {
+          "command": "continuum.deleteMemory",
+          "when": "view == continuum-memories && viewItem == memory",
+          "group": "9_delete@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "continuum.pushSelection",
+          "when": "editorHasSelection",
+          "group": "9_cutcopypaste@10"
         }
       ]
     },
     "configuration": {
-      "title": "Continuum",
+      "title": "Context Hub",
       "properties": {
         "continuum.serverUrl": {
           "type": "string",
           "default": "http://localhost:8000",
-          "description": "URL of the Continuum server"
-        },
-        "continuum.autoPushOnSave": {
-          "type": "boolean",
-          "default": false,
-          "description": "Automatically push a memory when files are saved"
+          "markdownDescription": "URL of an externally managed Continuum server. Only used when `#continuum.serverManaged#` is `false`."
         },
         "continuum.serverManaged": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically start and manage the Continuum server"
+          "markdownDescription": "When enabled, the extension automatically starts and manages the Continuum server process. Requires `continuum-context-hub` to be installed (`pip install continuum-context-hub`)."
         },
         "continuum.serverPort": {
           "type": "number",
           "default": 8111,
-          "description": "Port for the managed Continuum server"
+          "minimum": 1024,
+          "maximum": 65535,
+          "markdownDescription": "Port for the managed Continuum server. Only used when `#continuum.serverManaged#` is `true`."
+        },
+        "continuum.autoPushOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically record a lightweight memory entry each time you save a file. Useful for tracking which files were recently modified."
         }
       }
     }
