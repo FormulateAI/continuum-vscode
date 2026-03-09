@@ -2,7 +2,7 @@
   "name": "continuum-vscode",
   "displayName": "Continuum Context Hub",
   "description": "Connect VS Code to Continuum - the universal context layer for AI agents across IDEs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "FormulateAI",
   "repository": {
     "type": "git",

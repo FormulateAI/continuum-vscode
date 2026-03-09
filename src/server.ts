@@ -62,11 +62,13 @@ export class ServerManager {
     this.outputChannel.appendLine(`Starting Continuum server on port ${port}...`);
 
     try {
-      this.process = spawn('continuum', ['serve', '--port', String(port)], {
+      // Pass as a single shell string so PATH (pyenv, virtualenv, etc.) resolves correctly.
+      // Port is a validated number so concatenation is safe.
+      this.process = spawn(`continuum serve --port ${port}`, {
         stdio: ['ignore', 'pipe', 'pipe'],
         detached: false,
-        shell: true,  // resolve PATH via shell (pyenv, virtualenv, etc.)
-      });
+        shell: true,
+      } as import('child_process').SpawnOptions);
 
       this.process.stdout?.on('data', (data: Buffer) => {
         this.outputChannel.append(data.toString());

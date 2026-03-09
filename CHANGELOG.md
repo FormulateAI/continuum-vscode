@@ -2,6 +2,14 @@
 
 All notable changes to the "continuum-vscode" extension will be documented in this file.
 
+## [0.2.1] - 2026-03-10
+
+### Fixed
+- **Port mismatch bug** — managed server starts on port 8111 but client was connecting to 8000 (the wrong default), causing connection failures for all users with default settings
+- **PATH resolution** — extension now uses shell to spawn the `continuum` process, fixing failures on macOS with pyenv, conda, or virtualenv setups
+- **Config reactivity** — changing `serverManaged` or `serverPort` in settings now immediately updates the active connection without requiring a reload
+- **Sidebar silent failure** — sidebar now shows a clickable "Server unreachable" node instead of staying blank when the server is offline
+
 ## [0.2.0] - 2025-12-15
 
 ### Added
