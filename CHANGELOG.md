@@ -2,6 +2,11 @@
 
 All notable changes to the "continuum-vscode" extension will be documented in this file.
 
+## [0.2.2] - 2026-03-10
+
+### Changed
+- Renamed all "Connect to Continuum" button labels and status bar text to **"Connect to Context Hub"** for clarity
+
 ## [0.2.1] - 2026-03-10
 
 ### Fixed

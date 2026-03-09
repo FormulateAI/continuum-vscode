@@ -2,7 +2,7 @@
   "name": "continuum-vscode",
   "displayName": "Continuum Context Hub",
   "description": "Connect VS Code to Continuum - the universal context layer for AI agents across IDEs",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "FormulateAI",
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
     "commands": [
       {
         "command": "continuum.connect",
-        "title": "Continuum: Connect"
+        "title": "Context Hub: Connect"
       },
       {
         "command": "continuum.remember",
@@ -109,7 +109,7 @@
     "viewsWelcome": [
       {
         "view": "continuum-memories",
-        "contents": "No memories found.\n\nMake sure the Continuum server is running, then connect.\n[Connect to Continuum](command:continuum.connect)\n\nOnce connected, store your first memory.\n[Remember Something](command:continuum.remember)"
+        "contents": "No memories found.\n\nMake sure the Continuum server is running, then connect.\n[Connect to Context Hub](command:continuum.connect)\n\nOnce connected, store your first memory.\n[Remember Something](command:continuum.remember)"
       }
     ],
     "menus": {

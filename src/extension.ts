@@ -37,26 +37,26 @@ export async function activate(context: vscode.ExtensionContext) {
     100,
   );
   statusBar.command = 'continuum.connect';
-  statusBar.text = '$(database) Continuum';
-  statusBar.tooltip = 'Click to check Continuum connection';
+  statusBar.text = '$(database) Context Hub';
+  statusBar.tooltip = 'Click to connect to Context Hub';
   statusBar.show();
   context.subscriptions.push(statusBar);
 
   async function updateStatus() {
     try {
       await client.healthCheck();
-      statusBar.text = '$(database) Continuum';
-      statusBar.tooltip = 'Continuum: connected';
+      statusBar.text = '$(database) Context Hub';
+      statusBar.tooltip = 'Context Hub: connected';
     } catch (err) {
       console.warn('Continuum: health check failed:', err);
-      statusBar.text = '$(database) Continuum (offline)';
-      statusBar.tooltip = 'Continuum: disconnected — click to retry';
+      statusBar.text = '$(database) Context Hub (offline)';
+      statusBar.tooltip = 'Context Hub: disconnected — click to retry';
 
       // If server is managed and died, offer restart
       if (serverManager) {
         const running = await serverManager.isRunning();
         if (!running) {
-          statusBar.tooltip = 'Continuum: server stopped — click to restart';
+          statusBar.tooltip = 'Context Hub: server stopped — click to restart';
         }
       }
     }

@@ -6,7 +6,7 @@ export async function connectCommand(client: ContinuumClient): Promise<boolean> 
   try {
     const info = await client.healthCheck();
     vscode.window.showInformationMessage(
-      `Connected to Continuum v${info.version}`,
+      `Connected to Context Hub v${info.version}`,
     );
     return true;
   } catch (err) {
