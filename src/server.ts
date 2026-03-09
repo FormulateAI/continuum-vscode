@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ChildProcess, spawn, execFile } from 'child_process';
+import { ChildProcess, spawn, exec } from 'child_process';
 import axios from 'axios';
 
 export class ServerManager {
@@ -25,7 +25,7 @@ export class ServerManager {
 
   async ensureInstalled(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      execFile('continuum', ['--help'], (error) => {
+      exec('continuum --help', (error) => {
         if (!error) {
           resolve(true);
           return;
@@ -65,6 +65,7 @@ export class ServerManager {
       this.process = spawn('continuum', ['serve', '--port', String(port)], {
         stdio: ['ignore', 'pipe', 'pipe'],
         detached: false,
+        shell: true,  // resolve PATH via shell (pyenv, virtualenv, etc.)
       });
 
       this.process.stdout?.on('data', (data: Buffer) => {

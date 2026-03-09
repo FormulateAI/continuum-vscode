@@ -117,7 +117,11 @@ export async function activate(context: vscode.ExtensionContext) {
   // --- Configuration change listener ---
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('continuum.serverUrl')) {
+      if (
+        e.affectsConfiguration('continuum.serverUrl') ||
+        e.affectsConfiguration('continuum.serverManaged') ||
+        e.affectsConfiguration('continuum.serverPort')
+      ) {
         client = ContinuumClient.fromSettings();
         treeProvider.updateClient(client);
         updateStatus();

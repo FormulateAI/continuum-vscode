@@ -47,7 +47,15 @@ export class ContinuumClient {
 
   static fromSettings(): ContinuumClient {
     const config = vscode.workspace.getConfiguration('continuum');
-    const serverUrl = config.get<string>('serverUrl', 'http://localhost:8000');
+    const serverManaged = config.get<boolean>('serverManaged', true);
+    let serverUrl: string;
+    if (serverManaged) {
+      // Managed server always runs on serverPort — don't use the manual serverUrl
+      const port = config.get<number>('serverPort', 8111);
+      serverUrl = `http://localhost:${port}`;
+    } else {
+      serverUrl = config.get<string>('serverUrl', 'http://localhost:8000');
+    }
     return new ContinuumClient(serverUrl);
   }
 

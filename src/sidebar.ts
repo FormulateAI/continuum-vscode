@@ -107,7 +107,14 @@ export class MemoryTreeProvider implements vscode.TreeDataProvider<MemoryTreeIte
       }
     } catch (err) {
       console.warn('Continuum: Failed to load memories for sidebar:', err);
-      return [];
+      // Return an informational node so the user knows the server is unreachable
+      const node = new MemoryTreeItem(
+        'Server unreachable — click Connect',
+        vscode.TreeItemCollapsibleState.None,
+      );
+      node.command = { command: 'continuum.connect', title: 'Connect' };
+      node.iconPath = new vscode.ThemeIcon('warning');
+      return [node];
     }
 
     const nodes: MemoryTreeItem[] = [];
