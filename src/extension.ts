@@ -25,9 +25,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
   if (serverManaged) {
     serverManager = new ServerManager(context);
-    const installed = await serverManager.ensureInstalled();
-    if (installed) {
-      await serverManager.start();
+    try {
+      const installed = await serverManager.ensureInstalled();
+      if (installed) {
+        await serverManager.start();
+      }
+    } catch (err) {
+      console.error('Continuum: failed to start managed server:', err);
     }
   }
 

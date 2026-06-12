@@ -2,7 +2,7 @@
   "name": "continuum-vscode",
   "displayName": "Continuum Context Hub",
   "description": "Persistent AI memory for your codebase — store decisions, conventions, and architecture notes that any AI agent can recall instantly.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "FormulateAI",
   "repository": {
     "type": "git",

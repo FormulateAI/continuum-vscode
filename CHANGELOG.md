@@ -2,6 +2,12 @@
 
 All notable changes to the "continuum-vscode" extension will be documented in this file.
 
+## [0.2.4] - 2026-05-05
+
+### Fixed
+- **Extension activation crash** — managed server start (`ensureInstalled` / `start`) is now wrapped in try-catch; a missing or broken Python install no longer crashes the entire extension on startup
+- **Command crash when server is offline** — `getWorkspaceProject()` (HTTP call) was called outside try-catch in Save Memory, Search, View Context, and Save Selection commands; a refused connection now shows a user-friendly error instead of crashing
+
 ## [0.2.3] - 2026-03-10
 
 ### Changed

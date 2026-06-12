@@ -34,35 +34,35 @@ export async function connectCommand(client: ContinuumClient): Promise<boolean> 
 }
 
 export async function rememberCommand(client: ContinuumClient): Promise<void> {
-  const project = await client.getWorkspaceProject();
-  if (!project) {
-    vscode.window.showWarningMessage('Open a workspace folder first.');
-    return;
-  }
-
-  const content = await vscode.window.showInputBox({
-    title: 'Save to Context Hub',
-    prompt: 'What should your team and AI agents remember about this project?',
-    placeHolder: 'e.g. We use PostgreSQL with Prisma ORM — never write raw SQL',
-    validateInput: v => v.trim().length < 5 ? 'Please enter at least 5 characters.' : undefined,
-  });
-  if (!content) { return; }
-
-  const categoryPick = await vscode.window.showQuickPick(CATEGORY_ITEMS, {
-    title: 'Context Hub: Choose Category',
-    placeHolder: 'How should this memory be categorised?',
-    matchOnDescription: true,
-  });
-  if (!categoryPick) { return; }
-
-  const importancePick = await vscode.window.showQuickPick(IMPORTANCE_ITEMS, {
-    title: 'Context Hub: Choose Importance',
-    placeHolder: 'How important is this for AI agents to know?',
-    matchOnDescription: true,
-  });
-  if (!importancePick) { return; }
-
   try {
+    const project = await client.getWorkspaceProject();
+    if (!project) {
+      vscode.window.showWarningMessage('Open a workspace folder first.');
+      return;
+    }
+
+    const content = await vscode.window.showInputBox({
+      title: 'Save to Context Hub',
+      prompt: 'What should your team and AI agents remember about this project?',
+      placeHolder: 'e.g. We use PostgreSQL with Prisma ORM — never write raw SQL',
+      validateInput: v => v.trim().length < 5 ? 'Please enter at least 5 characters.' : undefined,
+    });
+    if (!content) { return; }
+
+    const categoryPick = await vscode.window.showQuickPick(CATEGORY_ITEMS, {
+      title: 'Context Hub: Choose Category',
+      placeHolder: 'How should this memory be categorised?',
+      matchOnDescription: true,
+    });
+    if (!categoryPick) { return; }
+
+    const importancePick = await vscode.window.showQuickPick(IMPORTANCE_ITEMS, {
+      title: 'Context Hub: Choose Importance',
+      placeHolder: 'How important is this for AI agents to know?',
+      matchOnDescription: true,
+    });
+    if (!importancePick) { return; }
+
     await client.storeMemory(
       project.id,
       content.trim(),
@@ -77,20 +77,20 @@ export async function rememberCommand(client: ContinuumClient): Promise<void> {
 }
 
 export async function recallCommand(client: ContinuumClient): Promise<void> {
-  const project = await client.getWorkspaceProject();
-  if (!project) {
-    vscode.window.showWarningMessage('Open a workspace folder first.');
-    return;
-  }
-
-  const query = await vscode.window.showInputBox({
-    title: 'Context Hub: Search Memories',
-    prompt: 'Search your project knowledge base',
-    placeHolder: 'e.g. database setup, auth flow, naming conventions, deployment',
-  });
-  if (!query) { return; }
-
   try {
+    const project = await client.getWorkspaceProject();
+    if (!project) {
+      vscode.window.showWarningMessage('Open a workspace folder first.');
+      return;
+    }
+
+    const query = await vscode.window.showInputBox({
+      title: 'Context Hub: Search Memories',
+      prompt: 'Search your project knowledge base',
+      placeHolder: 'e.g. database setup, auth flow, naming conventions, deployment',
+    });
+    if (!query) { return; }
+
     const results = await client.searchMemories(query, project.id);
     if (results.length === 0) {
       vscode.window.showInformationMessage(`No memories found for "${query}". Try a broader search term.`);
@@ -123,13 +123,13 @@ export async function recallCommand(client: ContinuumClient): Promise<void> {
 export async function showProjectContextCommand(
   client: ContinuumClient,
 ): Promise<void> {
-  const project = await client.getWorkspaceProject();
-  if (!project) {
-    vscode.window.showWarningMessage('Open a workspace folder first.');
-    return;
-  }
-
   try {
+    const project = await client.getWorkspaceProject();
+    if (!project) {
+      vscode.window.showWarningMessage('Open a workspace folder first.');
+      return;
+    }
+
     const briefing = await client.getProjectContext(project.id);
 
     const lines: string[] = [
@@ -196,27 +196,27 @@ export async function pushSelectionCommand(
     return;
   }
 
-  const project = await client.getWorkspaceProject();
-  if (!project) {
-    vscode.window.showWarningMessage('Open a workspace folder first.');
-    return;
-  }
-
-  const categoryPick = await vscode.window.showQuickPick(CATEGORY_ITEMS, {
-    title: 'Context Hub: Categorise Selection',
-    placeHolder: 'How should this selection be categorised?',
-    matchOnDescription: true,
-  });
-  if (!categoryPick) { return; }
-
-  const importancePick = await vscode.window.showQuickPick(IMPORTANCE_ITEMS, {
-    title: 'Context Hub: Choose Importance',
-    placeHolder: 'How important is this for AI agents to know?',
-    matchOnDescription: true,
-  });
-  if (!importancePick) { return; }
-
   try {
+    const project = await client.getWorkspaceProject();
+    if (!project) {
+      vscode.window.showWarningMessage('Open a workspace folder first.');
+      return;
+    }
+
+    const categoryPick = await vscode.window.showQuickPick(CATEGORY_ITEMS, {
+      title: 'Context Hub: Categorise Selection',
+      placeHolder: 'How should this selection be categorised?',
+      matchOnDescription: true,
+    });
+    if (!categoryPick) { return; }
+
+    const importancePick = await vscode.window.showQuickPick(IMPORTANCE_ITEMS, {
+      title: 'Context Hub: Choose Importance',
+      placeHolder: 'How important is this for AI agents to know?',
+      matchOnDescription: true,
+    });
+    if (!importancePick) { return; }
+
     await client.storeMemory(
       project.id,
       text.trim(),
